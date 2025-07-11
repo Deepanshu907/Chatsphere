@@ -1,5 +1,5 @@
 import express from "express";
-import "dotenv/config";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
@@ -12,15 +12,33 @@ import paymentRoutes from "./routes/payment.route.js"; // Add this import
 
 import { connectDB } from "./lib/db.js";
 
+
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 5001; // Change to 5001 to match frontend
 
 const __dirname = path.resolve();
 
+
+const allowedOrigins = [
+  "https://chatsphere0.netlify.app",
+  "http://localhost:3000",        // React dev server
+  "http://127.0.0.1:3000"         // Loopback address
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    credentials: true, // allow frontend to send cookies
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -58,6 +76,6 @@ app.use("*", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(Server is running on port ${PORT});
   connectDB();
 });
